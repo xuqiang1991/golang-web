@@ -1,0 +1,14 @@
+server:
+  port: "8080"
+  mode: "release"
+
+database:
+  host: "localhost"
+  port: "3306"
+  username: "root"
+  password: "123456"
+  database: "golang_web"
+
+jwt:
+  secret_key: "your-secret-key-change-in-production"
+  expire: 24

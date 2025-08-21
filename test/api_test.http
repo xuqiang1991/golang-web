@@ -1,0 +1,44 @@
+### Golang Web 应用 API 测试
+
+### 1. 健康检查
+GET http://localhost:8080/health
+
+### 2. 用户注册
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "testpass123",
+  "email": "test@example.com"
+}
+
+### 3. 用户登录
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 4. 获取用户信息（需要认证）
+GET http://localhost:8080/api/v1/user/profile
+Authorization: Bearer {{auth_token}}
+
+### 5. 刷新令牌（需要认证）
+POST http://localhost:8080/api/v1/token/refresh
+Authorization: Bearer {{auth_token}}
+
+### 6. 使用默认用户登录
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 变量设置说明：
+### 在登录成功后，将返回的 token 值复制到 {{auth_token}} 变量中
+### 或者直接在 Authorization 头中使用实际的 token 值
