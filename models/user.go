@@ -40,7 +40,7 @@ type RegisterRequest struct {
 // GetUserByUsername 根据用户名获取用户
 func GetUserByUsername(username string) (*User, error) {
 	user := &User{}
-	query := `SELECT id, username, password, email, created_at, updated_at FROM users WHERE username = ?`
+	query := `SELECT id, username, password, email, create_time, update_time FROM t_user WHERE username = ?`
 
 	err := database.DB.QueryRow(query, username).Scan(
 		&user.ID,
@@ -64,7 +64,7 @@ func GetUserByUsername(username string) (*User, error) {
 // GetUserByID 根据用户ID获取用户
 func GetUserByID(userID int) (*User, error) {
 	user := &User{}
-	query := `SELECT id, username, password, email, created_at, updated_at FROM users WHERE id = ?`
+	query := `SELECT id, username, password, email, create_time, update_time FROM t_user WHERE id = ?`
 
 	err := database.DB.QueryRow(query, userID).Scan(
 		&user.ID,
@@ -97,9 +97,18 @@ func CreateUser(req *RegisterRequest) (*User, error) {
 		return nil, fmt.Errorf("用户名已存在")
 	}
 
+	// 对密码进行哈希加密
+	hashedPassword, err := database.HashPassword(req.Password)
+	if err != nil {
+		return nil, fmt.Errorf("密码加密失败: %v", err)
+	}
+
+	// 获取当前时间
+	currentTime := time.Now().Format("2006-01-02 15:04:05")
+
 	// 创建用户
-	query := `INSERT INTO users (username, password, email) VALUES (?, ?, ?)`
-	result, err := database.DB.Exec(query, req.Username, req.Password, req.Email)
+	query := `INSERT INTO t_user (username, password, email, create_time, update_time) VALUES (?, ?, ?, ?, ?)`
+	result, err := database.DB.Exec(query, req.Username, hashedPassword, req.Email, currentTime, currentTime)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +130,7 @@ func CreateUser(req *RegisterRequest) (*User, error) {
 
 // ValidatePassword 验证用户密码
 func (u *User) ValidatePassword(password string) bool {
-	// 这里应该使用安全的密码比较方法
-	// 生产环境建议使用 bcrypt.CompareHashAndPassword
-	return u.Password == password
+	// 使用 bcrypt 进行安全的密码比较
+	err := database.CheckPassword(password, u.Password)
+	return err == nil
 }
